@@ -70,7 +70,7 @@ namespace EvolutionSimulator
             }
         }
         
-        public Mutate(int num)
+        public void Mutate(int num)
         {
             int mutation = 1;
             for (int i = 0; i < num; i++){
@@ -124,6 +124,8 @@ namespace EvolutionSimulator
                 this.weight += bits[i] * mult;
                 mult *= 2;
             }
+            this.weight /= 512;
+            this.weight -= -4;
         }
 
         public int StartType => this.startType;
@@ -137,16 +139,16 @@ namespace EvolutionSimulator
         public int Weight => this.weight;
 
     }
-    
+
     class Creature
     {
+        private static int inputAmount = 5;
+        private static int neuronAmount = 3;
+        private static int outputAmount = 4;
+        private static float[] neurons = new float[neuronAmount];
+        private static int connections = 8;
         private Habitat habitat;
-        private int[] genes;
-        private int inputAmount = 5;
-        private int neuronAmount = 3;
-        private int outputAmount = 4;
-        private int[] neurons = new int[neuronAmount];
-        private int connections = 8;
+        private Gene[] genes;
         private int xpos;
         private int ypos;
         public Creature(Habitat habitat, int xpos, int ypos, int seed)
@@ -154,7 +156,7 @@ namespace EvolutionSimulator
             this.habitat = habitat;
             this.xpos = xpos;
             this.ypos = ypos;
-            this.genes = new int[connections];
+            this.genes = new Gene[connections];
             Random rand;
             for (int i = 0; i < connections; i++)
             {
@@ -163,103 +165,147 @@ namespace EvolutionSimulator
                 seed += 1;
             }
 
-            for (int i = 0; i < this.neuronAmount, i++)
+            for (int i = 0; i < neuronAmount; i++)
             {
                 neurons[i] = 0;
             }
         }
 
-        public Creature(Habitat habitat, int xpos, int ypos, int[] genes)
+        public Creature(Habitat habitat, int xpos, int ypos, Gene[] genes)
         {
             this.habitat = habitat;
             this.xpos = xpos;
             this.ypos = ypos;
             this.genes = genes;
 
-            for (int i = 0; i < this.neuronAmount, i++)
+            for (int i = 0; i < neuronAmount; i++)
             {
                 neurons[i] = 0;
             }
         }
 
-        public int[] Genes => genes;
+        public Gene[] Genes => genes;
+
+        public int X => xpos;
+
+        public int Y => ypos;
 
         private float SenseUp()
         {
-            if (habitat.GetPosition(xpos, ypos-1) == null)
+            if (ypos > 0)
             {
-                return 0;
+                if (habitat.GetPosition(xpos, ypos-1) == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return 1;
+                }
             }
             else
-            { 
-                return 1; 
+            {
+                return 0;
             }
         }
 
         private float SenseDown()
         {
-            if (habitat.GetPosition(xpos, ypos + 1) == null)
+            if (ypos < habitat.Length-1)
             {
-                return 0;
+                if (habitat.GetPosition(xpos, ypos+1) == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return 1;
+                }
             }
             else
             {
-                return 1;
+                return 0;
             }
         }
 
         private float SenseRight()
         {
-            if (habitat.GetPosition(xpos + 1, ypos) == null)
+            if (xpos < habitat.Width - 1)
             {
-                return 0;
+                if (habitat.GetPosition(xpos + 1, ypos) == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return 1;
+                }
             }
             else
             {
-                return 1;
+                return 0;
             }
         }
 
         private float SenseLeft()
         {
-            if (habitat.GetPosition(xpos - 1, ypos) == null)
+            if (xpos > 0)
             {
-                return 0;
+                if (habitat.GetPosition(xpos - 1, ypos) == null)
+                {
+                    return 0;
+                }
+                else
+                { 
+                    return 1; 
+                }
             }
             else
             {
-                return 1;
+                return 0;
             }
         }
 
         private float SenseAge() => habitat.Time/habitat.MaxTime;
 
-        private void MoveUp(int Signal)
+        private void MoveUp(float Signal)
         {
-            habitat.SetPosition(xpos, ypos, null);
-            ypos -= 1;
-            habitat.SetPosition(xpos, ypos, this);
+            if (Signal > 0)
+            {
+                habitat.SetPosition(xpos, ypos, null);
+                if (ypos > 0) { ypos -= 1; }
+                habitat.SetPosition(xpos, ypos, this);
+            }
         }
 
-        private void MoveDown(int Signal)
+        private void MoveDown(float Signal)
         {
-            habitat.SetPosition(xpos, ypos, null);
-            ypos += 1;
-            habitat.SetPosition(xpos, ypos, this);
+            if (Signal > 0)
+            {
+                habitat.SetPosition(xpos, ypos, null);
+                if (ypos < habitat.Length - 1) { ypos += 1; }
+                habitat.SetPosition(xpos, ypos, this);
+            }
         }
 
-        private void MoveRight(int Signal)
+        private void MoveRight(float Signal)
         {
-            habitat.SetPosition(xpos, ypos, null);
-            xpos += 1;
-            habitat.SetPosition(xpos, ypos, this);
+            if (Signal > 0)
+            {
+                habitat.SetPosition(xpos, ypos, null);
+                if (xpos < habitat.Width - 1) { xpos += 1; }
+                habitat.SetPosition(xpos, ypos, this);
+            }
         }
 
-        private void MoveLeft(int Signal)
+        private void MoveLeft(float Signal)
         {
-            habitat.SetPosition(xpos, ypos, null);
-            xpos -= 1;
-            habitat.SetPosition(xpos, ypos, this);
+            if (Signal > 0)
+            {
+                habitat.SetPosition(xpos, ypos, null);
+                if (xpos > 0) { xpos -= 1; }
+                habitat.SetPosition(xpos, ypos, this);
+            }
         }
 
         private float Input(int ID)
@@ -290,7 +336,7 @@ namespace EvolutionSimulator
             }
         }
 
-        private void Output(int[] Signals)
+        private void Output(float[] Signals)
         {
             MoveUp(Signals[0]);
             MoveDown(Signals[1]);
@@ -300,8 +346,8 @@ namespace EvolutionSimulator
 
         public void Action()
         {
-            int[] Signals = new int[outputAmount];
-            for (int i = 0; i < this.outputAmount, i++)
+            float[] Signals = new float[outputAmount];
+            for (int i = 0; i < outputAmount; i++)
             {
                 Signals[i] = 0;
             }
@@ -311,11 +357,11 @@ namespace EvolutionSimulator
                 {
                     if (genes[i].EndType == 0)
                     {
-                        Signals[genes[i].EndID%outputAmount] += genes[i].weight * Input(genes[i].StartID%inputAmount);
+                        Signals[genes[i].EndID%outputAmount] += genes[i].Weight * Input(genes[i].StartID%inputAmount);
                     }  
                     else
                     {
-                        neurons[genes[i].EndID%neuronAmount] += genes[i].weight * Input(genes[i].StartID%inputAmount);
+                        neurons[genes[i].EndID%neuronAmount] += genes[i].Weight * Input(genes[i].StartID%inputAmount);
                     }
                 }
             }
@@ -323,27 +369,27 @@ namespace EvolutionSimulator
             {
                 if (genes[i].StartType == 1 && genes[i].EndType == 1)
                 {
-                    neurons[genes[i].EndID%neuronAmount] += genes[i].weight * neurons[genes[i].StartID%neuronAmount];
+                    neurons[genes[i].EndID%neuronAmount] += genes[i].Weight * neurons[genes[i].StartID%neuronAmount];
                 }
             }
             for (int i = 0; i < connections; i++)
             {
                 if (genes[i].StartType == 1 && genes[i].EndType == 0)
                 {
-                    Signals[genes[i].EndID%outputAmount] += genes[i].weight * neurons[genes[i].StartID%neuronAmount];
+                    Signals[genes[i].EndID%outputAmount] += genes[i].Weight * neurons[genes[i].StartID%neuronAmount];
                 }
             }
             Output(Signals);
         }
     }
 
-    virtual class Habitat
+    class Habitat
     {
-        private List<Creature> creatures = new List<Creature>();
+        public List<Creature> creatures = new List<Creature>();
         private int generation;
         private int maxTime;
         private int time;
-        private int mutationChance;
+        private float mutationChance;
         private int reproduceChance;
         private int creatureAmount;
         private int maxChild;
@@ -353,7 +399,7 @@ namespace EvolutionSimulator
         private Creature[,] positions;
 
 
-        public Habitat(int length, int width, int maxTime, int creatureAmount, int maxChild, int reproduceChance, int mutationChance, int modifier)
+        public Habitat(int length, int width, int maxTime, int creatureAmount, int maxChild, int reproduceChance, float mutationChance, int modifier)
         {
             generation = 0;
             this.maxTime = maxTime;
@@ -392,7 +438,7 @@ namespace EvolutionSimulator
         {
             Random rand = new Random(modifier);
             modifier = rand.Next(1000000);
-            return (int)((modifier/1000000)*(max-min)) + min;
+            return (int)(((float)modifier/1000000)*(max-min)) + min;
         }
 
         public virtual bool Survive(Creature creature)
@@ -415,25 +461,29 @@ namespace EvolutionSimulator
 
         public int MaxTime => maxTime;
 
-        private int[] Mutate(int[] genes) {
+        public int Length => length;
+
+        public int Width => width;
+
+        private Gene[] Mutate(Gene[] genes) {
             if (RandNum(0, 10000) < mutationChance*100)
             {
-                 genes[i].Mutate(RandNum(0, 32));
+                 genes[RandNum(0, genes.Length)].Mutate(RandNum(0, 32));
             }
-            return newGene;
+            return genes;
         }
 
-        private virtual void Reproduce(List<Creature> parents) 
+        public virtual void Reproduce(List<Creature> parents) 
         {
             creatures = new List<Creature>();
             positions = new Creature[length, width];
             int xpos;
-            int ypos;.
+            int ypos;
             for (int i = 0; i < maxChild *parents.Count; i++) {
                 if (RandNum(0, 100) < reproduceChance && creatures.Count < creatureAmount)
                 {
-                   xpos = RandNext(0, width);
-                   ypos = RandNum.(0, length);
+                   xpos = RandNum(0, width);
+                   ypos = RandNum(0, length);
                    while (positions[ypos,xpos] != null) 
                    {
                        xpos += 1;
@@ -441,8 +491,9 @@ namespace EvolutionSimulator
                        if (xpos >= width) { xpos = 0; }
                        if (ypos >= length) { ypos = 0; }
                    }
-                   creatures.Add(new Creature(uyfuy..this, xpos, ypos, Mutate(parents[i%parents.Count].Genes)));.
-                   positions[ypos,xpos] = creatures[i];
+                   Creature c = new Creature(this, xpos, ypos, Mutate(parents[i % parents.Count].Genes));
+                   creatures.Add(c);
+                   positions[ypos,xpos] = c;
                 }
             }
         }
@@ -468,6 +519,7 @@ namespace EvolutionSimulator
             }
 
             List<Creature> parents = creatures;
+            Console.WriteLine(parents.Count);
             Reproduce(parents);
             generation += 1;
         }
@@ -485,7 +537,7 @@ namespace EvolutionSimulator
             for (int i = 0; i < maxTime; i++)
             {
                 ShowHabitat();
-                for (int j = .0; j < creatures.Count; j++)
+                for (int j = 0; j < creatures.Count; j++)
                 {
                     creatures[j].Action();
                     time = j;
@@ -515,9 +567,13 @@ namespace EvolutionSimulator
 
     class Habitat1 : Habitat
     {
-        private override bool Survive(Creature creature)
+        public Habitat1(int length, int width, int maxTime, int creatureAmount, int maxChild, int reproduceChance, float mutationChance, int modifier) : base(length, width, maxTime, creatureAmount, maxChild, reproduceChance, mutationChance, modifier)
         {
-            return creature.xpos > this.length/2;
+            
+        }
+        public override bool Survive(Creature creature)
+        {
+            return creature.X > this.Length/2;
         }
     }
 
@@ -526,10 +582,18 @@ namespace EvolutionSimulator
     {
         static void Main(string[] args)
         {
-            Habitat1 habitat = new Habitat1(500, 500, 500, 250, 3, 50, 1);
-            habitat.
-            
-            Console.WriteLine(0xFFFFFFF);
+            int length = 500;
+            int width = 500;
+            int maxTime = 500;
+            int creatureAmount = 100;
+            int maxChild = 100;
+            int reproduceChance = 100;
+            float mutationChance = 0.1f;
+            int modifier = 1;
+            Habitat1 habitat = new Habitat1(length, width, maxTime, creatureAmount, maxChild, reproduceChance, mutationChance, modifier);
+            habitat.GetToGeneration(300);
+            int c = habitat.creatures.Count;
+            Console.WriteLine(c);
         }
     }
 }
