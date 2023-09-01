@@ -273,7 +273,7 @@ namespace EvolutionSimulator
             if (Signal > 0)
             {
                 habitat.SetPosition(xpos, ypos, null);
-                if (ypos > 0) { ypos -= 1; }
+                if (ypos > 0 && habitat.GetPosition(xpos,ypos-1) == null) { ypos -= 1; }
                 habitat.SetPosition(xpos, ypos, this);
             }
         }
@@ -283,7 +283,7 @@ namespace EvolutionSimulator
             if (Signal > 0)
             {
                 habitat.SetPosition(xpos, ypos, null);
-                if (ypos < habitat.Length - 1) { ypos += 1; }
+                if (ypos < habitat.Length - 1 && habitat.GetPosition(xpos, ypos+1) == null) { ypos += 1; }
                 habitat.SetPosition(xpos, ypos, this);
             }
         }
@@ -293,7 +293,7 @@ namespace EvolutionSimulator
             if (Signal > 0)
             {
                 habitat.SetPosition(xpos, ypos, null);
-                if (xpos < habitat.Width - 1) { xpos += 1; }
+                if (xpos < habitat.Width - 1 && habitat.GetPosition(xpos+1, ypos) == null) { xpos += 1; }
                 habitat.SetPosition(xpos, ypos, this);
             }
         }
@@ -303,7 +303,7 @@ namespace EvolutionSimulator
             if (Signal > 0)
             {
                 habitat.SetPosition(xpos, ypos, null);
-                if (xpos > 0) { xpos -= 1; }
+                if (xpos > 0 && habitat.GetPosition(xpos-1, ypos) == null) { xpos -= 1; }
                 habitat.SetPosition(xpos, ypos, this);
             }
         }
@@ -498,7 +498,7 @@ namespace EvolutionSimulator
             }
         }
 
-        private void LifeCycle()
+        public void LifeCycle()
         {
             for (int i = 0; i < maxTime; i++)
             {
@@ -561,7 +561,29 @@ namespace EvolutionSimulator
 
         private void ShowHabitat()
         {
-          
+            char[,] hab = new char[this.length, this.width];
+
+            for (int i = 0; i < this.length; i++)
+            {
+                for (int j = 0; j < this.width; j++)
+                {
+                    if (positions[i,j] != null)
+                    {
+                        Console.Write("o");
+                    }
+                    else
+                    {
+                        Console.Write("_");
+                    }
+                }
+                Console.WriteLine();
+            }
+            for (int i = 0;i < this.length; i++)
+            {
+                Console.Write("=");
+            }
+            Console.WriteLine();
+            Console.WriteLine();
         }
     }
 
@@ -573,7 +595,7 @@ namespace EvolutionSimulator
         }
         public override bool Survive(Creature creature)
         {
-            return creature.X > this.Length/2;
+            return creature.X < this.Length/2;
         }
     }
 
@@ -582,18 +604,23 @@ namespace EvolutionSimulator
     {
         static void Main(string[] args)
         {
-            int length = 500;
-            int width = 500;
-            int maxTime = 500;
-            int creatureAmount = 100;
+            int length = 50;
+            int width = 50;
+            int maxTime = 50;
+            int creatureAmount = 1000;
             int maxChild = 100;
             int reproduceChance = 100;
             float mutationChance = 0.1f;
             int modifier = 1;
             Habitat1 habitat = new Habitat1(length, width, maxTime, creatureAmount, maxChild, reproduceChance, mutationChance, modifier);
-            habitat.GetToGeneration(300);
-            int c = habitat.creatures.Count;
-            Console.WriteLine(c);
+            //habitat.VisualLifeCycle();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            habitat.GetToGeneration(10);
+            //habitat.VisualLifeCycle();
+            Console.Read();
         }
     }
 }
