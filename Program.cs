@@ -13,7 +13,7 @@ namespace EvolutionSimulator
         private int startID;
         private int endID;
         private int weight;
-        public int encoding;
+        private int encoding;
 
         public Gene(int seed)
         {
@@ -156,12 +156,12 @@ namespace EvolutionSimulator
         // Always the amount of input functions
         private static int inputAmount = 7;
         // Can vary
-        private static int neuronAmount = 15;
+        private static int neuronAmount = 2;
         // Always the amount of output functions
         private static int outputAmount = 4 + (canKill ? 1 : 0);
         private static float[] neurons = new float[neuronAmount];
         // Can vary
-        private static int connections = 1;
+        private static int connections = 8;
         private Habitat habitat;
         private Gene[] genes;
         private int xpos;
@@ -523,7 +523,7 @@ namespace EvolutionSimulator
 
         public int Width => width;
 
-        public Gene[] Mutate(Gene[] genes) {
+        private Gene[] Mutate(Gene[] genes) {
             if (RandNum(0, 10000) < mutationChance*100)
             {
                 genes[RandNum(0, genes.Length)].Mutate(RandNum(0, 28));
@@ -763,9 +763,20 @@ namespace EvolutionSimulator
 
         public override bool Survive(Creature creature)
         {
-            if (Generation < -1)
-                return ((creature.Y - this.Length / 2) * (creature.Y - this.Length / 2) + (creature.X - this.Width / 2) * (creature.X - this.Width / 2)) < 100;
-            else return true;
+            return ((creature.Y - this.Length / 2) * (creature.Y - this.Length / 2) + (creature.X - this.Width / 2) * (creature.X - this.Width / 2)) > 600;
+        }
+    }
+
+    class Habitat5 : Habitat
+    {
+        public Habitat5(int length, int width, int maxTime, int creatureAmount, int maxChild, int reproduceChance, float mutationChance, int modifier) : base(length, width, maxTime, creatureAmount, maxChild, reproduceChance, mutationChance, modifier)
+        {
+
+        }
+
+        public override bool Survive(Creature creature)
+        {
+            return (creature.Y - this.Length) < 4 || (creature.Y) < 4 || (creature.X - this.Width) < 4 || (creature.X) < 4
         }
     }
 
@@ -777,18 +788,14 @@ namespace EvolutionSimulator
             int length = 50;
             int width = 50;
             int maxTime = 50;
-            int creatureAmount = 100;
+            int creatureAmount = 500;
             int maxChild = 100;
             int reproduceChance = 100;
-            float mutationChance = 100f;
+            float mutationChance = 1f;
             int modifier = 1;
             Habitat4 habitat = new Habitat4(length, width, maxTime, creatureAmount, maxChild, reproduceChance, mutationChance, modifier);
-            habitat.GetToGeneration(1, true);
-            //habitat.VisualLifeCycle();
-            for (int i = 0; i < 100; i++)
-            {
-                Console.WriteLine(habitat.GetCreature(i).Genes[0].encoding);
-            }
+            habitat.GetToGeneration(100, true);
+            habitat.VisualLifeCycle();
             
         }
     }
