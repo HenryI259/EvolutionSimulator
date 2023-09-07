@@ -148,6 +148,8 @@ namespace EvolutionSimulator
 
         public int Weight => this.weight;
 
+        public int Encoding => this.encoding;
+
     }
 
     class Creature
@@ -156,12 +158,12 @@ namespace EvolutionSimulator
         // Always the amount of input functions
         private static int inputAmount = 7;
         // Can vary
-        private static int neuronAmount = 2;
+        private static int neuronAmount = 20;
         // Always the amount of output functions
         private static int outputAmount = 4 + (canKill ? 1 : 0);
         private static float[] neurons = new float[neuronAmount];
         // Can vary
-        private static int connections = 8;
+        private static int connections = 80;
         private Habitat habitat;
         private Gene[] genes;
         private int xpos;
@@ -206,6 +208,16 @@ namespace EvolutionSimulator
         public int X => xpos;
 
         public int Y => ypos;
+
+        public String GetGenome()
+        {
+            int sum = 0;
+            for (int i = 0; i < connections; i++)
+            {
+                sum += genes[i].Encoding;
+            }
+            return sum.ToString("X");
+        }
 
         private float SenseUp()
         {
@@ -513,6 +525,14 @@ namespace EvolutionSimulator
             positions[y, x] = creature;
         }
 
+        public void PrintGenomes()
+        {
+            for (int i = 0; i < creatures.Count; i++)
+            {
+                Console.WriteLine(this.GetCreature(i).GetGenome());
+            }
+        }
+
         public int Generation => generation;
 
         public int Time => time;
@@ -776,7 +796,11 @@ namespace EvolutionSimulator
 
         public override bool Survive(Creature creature)
         {
-            return (creature.Y - this.Length) < 4 || (creature.Y) < 4 || (creature.X - this.Width) < 4 || (creature.X) < 4
+            if (Generation == 0)
+            {
+                return creature.Equals(this.GetCreature(0));
+            }
+            else return true;// (this.Length - creature.Y) < 1 || (creature.Y) < 1 || (this.Width - creature.X) < 1 || (creature.X) < 1;
         }
     }
 
@@ -787,15 +811,17 @@ namespace EvolutionSimulator
         {
             int length = 50;
             int width = 50;
-            int maxTime = 50;
-            int creatureAmount = 500;
-            int maxChild = 100;
+            int maxTime = 25;
+            int creatureAmount = 100;
+            int maxChild = 2;
             int reproduceChance = 100;
-            float mutationChance = 1f;
+            float mutationChance = 10f;
             int modifier = 1;
-            Habitat4 habitat = new Habitat4(length, width, maxTime, creatureAmount, maxChild, reproduceChance, mutationChance, modifier);
-            habitat.GetToGeneration(100, true);
+            Habitat5 habitat = new Habitat5(length, width, maxTime, creatureAmount, maxChild, reproduceChance, mutationChance, modifier);
+            habitat.GetToGeneration(11, true);
             habitat.VisualLifeCycle();
+            habitat.PrintGenomes();
+            Console.Read();
             
         }
     }
