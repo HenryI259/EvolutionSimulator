@@ -557,7 +557,7 @@ namespace EvolutionSimulator
             positions = new Creature[length, width];
             int xpos;
             int ypos;
-            for (int i = 0; i < maxChild *parents.Count; i++) {
+            for (int i = 0; i < maxChild*parents.Count; i++) {
                 if (RandNum(0, 100) < reproduceChance && creatures.Count < creatureAmount)
                 {
                    xpos = RandNum(0, width);
@@ -798,7 +798,7 @@ namespace EvolutionSimulator
         {
             if (Generation == 0)
             {
-                return creature.Equals(this.GetCreature(0));
+                return creature.Equals(this.GetCreature(0)) || creature.Equals(this.GetCreature(1));
             }
             else return true;// (this.Length - creature.Y) < 1 || (creature.Y) < 1 || (this.Width - creature.X) < 1 || (creature.X) < 1;
         }
@@ -812,17 +812,16 @@ namespace EvolutionSimulator
             int length = 50;
             int width = 50;
             int maxTime = 25;
-            int creatureAmount = 100;
+            int creatureAmount = 16;
             int maxChild = 2;
             int reproduceChance = 100;
-            float mutationChance = 10f;
+            float mutationChance = 50f;
             int modifier = 1;
             Habitat5 habitat = new Habitat5(length, width, maxTime, creatureAmount, maxChild, reproduceChance, mutationChance, modifier);
-            habitat.GetToGeneration(11, true);
-            habitat.VisualLifeCycle();
+            habitat.GetToGeneration(22, false);
+            //habitat.VisualLifeCycle();
             habitat.PrintGenomes();
-            Console.Read();
-            
         }
     }
 }
+//Ikigai
