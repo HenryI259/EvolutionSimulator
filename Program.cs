@@ -1,6 +1,7 @@
  using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +22,63 @@ namespace EvolutionSimulator
             this.encoding = rand.Next(0, 268435456);
 
             int nums = encoding;
+
+            int[] bits = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+            for (int i = 0; i < 7; i++)
+            {
+                int digit = (int)(nums % 0x10);
+                if (digit >= 8)
+                {
+                    bits[i * 4 + 3] = 1;
+                    digit -= 8;
+                }
+                if (digit >= 4)
+                {
+                    bits[i * 4 + 2] = 1;
+                    digit -= 4;
+                }
+                if (digit >= 2)
+                {
+                    bits[i * 4 + 1] = 1;
+                    digit -= 2;
+                }
+                if (digit >= 1)
+                {
+                    bits[i * 4] = 1;
+                }
+                nums /= 0x10;
+            }
+
+            this.startType = bits[27];
+            this.endType = bits[19];
+
+            int mult = 1;
+            this.startID = 0;
+            this.endID = 0;
+            for (int i = 12; i < 19; i++)
+            {
+                this.startID += bits[i + 8] * mult;
+                this.endID += bits[i] * mult;
+                mult *= 2;
+            }
+
+            mult = 1;
+            this.weight = 0;
+            for (int i = 0; i < 12; i++)
+            {
+                this.weight += bits[i] * mult;
+                mult *= 2;
+            }
+            this.weight /= 512;
+            this.weight -= -4;
+        }
+
+        public Gene(String encoding)
+        {
+            this.encoding = Int32.Parse(encoding);
+
+            int nums = this.encoding;
 
             int[] bits = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -154,7 +212,7 @@ namespace EvolutionSimulator
 
     class Creature
     {
-        private static bool canKill = false;
+        private static bool canKill = true;
         // Always the amount of input functions
         private static int inputAmount = 7;
         // Can vary
@@ -543,12 +601,20 @@ namespace EvolutionSimulator
 
         public int Width => width;
 
-        private Gene[] Mutate(Gene[] genes) {
+        public Gene[] Mutate(Gene[] genes) {
+            Gene[] newGenes = new Gene[genes.Length];
+
+            for (int i = 0; i < newGenes.Length; i++)
+            {
+                newGenes[i] = new Gene(genes[i].Encoding.ToString());
+            }
+
             if (RandNum(0, 10000) < mutationChance*100)
             {
-                genes[RandNum(0, genes.Length)].Mutate(RandNum(0, 28));
+                newGenes[RandNum(0, newGenes.Length)].Mutate(RandNum(0, 28));
+                
             }
-            return genes;
+            return newGenes;
         }
 
         public virtual void Reproduce(List<Creature> parents) 
@@ -796,11 +862,7 @@ namespace EvolutionSimulator
 
         public override bool Survive(Creature creature)
         {
-            if (Generation == 0)
-            {
-                return creature.Equals(this.GetCreature(0)) || creature.Equals(this.GetCreature(1));
-            }
-            else return true;// (this.Length - creature.Y) < 1 || (creature.Y) < 1 || (this.Width - creature.X) < 1 || (creature.X) < 1;
+            return (this.Length - creature.Y) < 1 || (creature.Y) < 1 || (this.Width - creature.X) < 1 || (creature.X) < 1;
         }
     }
 
@@ -809,18 +871,18 @@ namespace EvolutionSimulator
     {
         static void Main(string[] args)
         {
-            int length = 50;
-            int width = 50;
-            int maxTime = 25;
-            int creatureAmount = 16;
-            int maxChild = 2;
+            int length = 70;
+            int width = 70;
+            int maxTime = 35;
+            int creatureAmount = 500;
+            int maxChild = 100;
             int reproduceChance = 100;
-            float mutationChance = 50f;
+            float mutationChance = 5f;
             int modifier = 1;
             Habitat5 habitat = new Habitat5(length, width, maxTime, creatureAmount, maxChild, reproduceChance, mutationChance, modifier);
-            habitat.GetToGeneration(22, false);
-            //habitat.VisualLifeCycle();
-            habitat.PrintGenomes();
+            habitat.GetToGeneration(100000, true);
+            habitat.VisualLifeCycle();
+            Console.ReadLine();
         }
     }
 }
