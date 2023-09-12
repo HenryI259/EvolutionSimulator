@@ -7,13 +7,21 @@ using System.Threading.Tasks;
 
 namespace EvolutionSimulator
 {
+    class Util
+    {
+        public float Sigmoid(float x)
+        {
+            return 1/(1+Math.exp(-x))
+        }
+    }
+    
     class Gene
     {
         private int startType;
         private int endType;
         private int startID;
         private int endID;
-        private int weight;
+        private float weight;
         private int encoding;
 
         public Gene(int seed)
@@ -204,7 +212,7 @@ namespace EvolutionSimulator
 
         public int EndID => this.endID;
 
-        public int Weight => this.weight;
+        public float Weight => this.weight;
 
         public int Encoding => this.encoding;
 
@@ -481,7 +489,7 @@ namespace EvolutionSimulator
             }
             for (int i = 0; i < connections; i++)
             {
-                if (genes[i].StartType == 0) 
+                if (genes[i].StartType == 0)
                 {
                     if (genes[i].EndType == 0)
                     {
@@ -497,15 +505,19 @@ namespace EvolutionSimulator
             {
                 if (genes[i].StartType == 1 && genes[i].EndType == 1)
                 {
-                    neurons[genes[i].EndID%neuronAmount] += genes[i].Weight * neurons[genes[i].StartID%neuronAmount];
+                    neurons[genes[i].EndID%neuronAmount] += genes[i].Weight * (float)Math.Tanh((double)neurons[genes[i].StartID%neuronAmount]);
                 }
             }
             for (int i = 0; i < connections; i++)
             {
                 if (genes[i].StartType == 1 && genes[i].EndType == 0)
                 {
-                    Signals[genes[i].EndID%outputAmount] += genes[i].Weight * neurons[genes[i].StartID%neuronAmount];
+                    Signals[genes[i].EndID%outputAmount] += genes[i].Weight * (float)Math.Tanh((double)neurons[genes[i].StartID%neuronAmount]);
                 }
+            }
+            for (int i = 0; i < outputAmount; i++)
+            {
+                Signals[i] = (float)Math.Tanh((double)Signals[i]);
             }
             Output(Signals);
         }
