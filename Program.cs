@@ -221,7 +221,7 @@ namespace EvolutionSimulator
         private static int outputAmount = 4 + (canKill ? 1 : 0);
         private static double[] neurons = new double[neuronAmount];
         // Can vary
-        private static int connections = 160;
+        private static int connections = 100;
         private Habitat habitat;
         private Gene[] genes;
         private int xpos;
@@ -682,6 +682,7 @@ namespace EvolutionSimulator
             List<Creature> parents = creatures;
             if (stats)
             {
+                Console.WriteLine("Generation " + Generation);
                 Console.WriteLine("Survived: " + parents.Count);
                 Console.WriteLine("Died: " + deaths);
                 Console.WriteLine();
@@ -877,7 +878,7 @@ namespace EvolutionSimulator
 
         public override bool Survive(Creature creature)
         {
-            return (this.Length - creature.Y) < 3 || (creature.Y) < 3 || (this.Width - creature.X) < 3 || (creature.X) < 3;
+            return (this.Width - creature.X) < 5 || (creature.X) < 5;
         }
     }
 
@@ -886,17 +887,18 @@ namespace EvolutionSimulator
     {
         static void Main(string[] args)
         {
-            int length = 70;
-            int width = 70;
-            int maxTime = 35;
-            int creatureAmount = 300;
+            int length = 100;
+            int width = 100;
+            int maxTime = 200;
+            int creatureAmount = 1000;
             int maxChild = 100;
             int reproduceChance = 100;
             double mutationChance = 0.1;
             int modifier = 1;
             Habitat5 habitat = new Habitat5(length, width, maxTime, creatureAmount, maxChild, reproduceChance, mutationChance, modifier);
-            habitat.GetToGeneration(1000, true);
+            habitat.GetToGeneration(4000, true);
             habitat.VisualLifeCycle();
+            Console.ReadLine();
         }
     }
 }
